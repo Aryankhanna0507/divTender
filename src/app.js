@@ -1,39 +1,22 @@
 const express=require("express");
 
-const app=express(); // here we are creating express js application
-// // we are creating web server 
-// // now we have to listen on some port so that anybody connect with it 
-
-// app.use("/test",(req,res)=>{ // this function is called request handler
-//   res.send("hello from the server!")
-// })
-app.use("/hello",(req,res)=>{
-  res.send("hello  hello hello");
-})
-// // put this / (slash code) at the end otherwise non of the route will get execute (it will overwrite every other route)
-// app.use("/",(req,res)=>{
-//   res.send("this is by default if you do not add / ");
-// })
-
-// app.get -> this method is only for handling the http method get api calls reqeust
-app.get("/user",(req,res)=>{
-  console.log(req.url);
-  console.log(req.method);
+const app=express(); 
+// you put a question mark it means now b is optional here
+// if you + means any number b can be there a{bahut sare b}c
+// if you put * means anything can be in there in place of star the only condition is start with ab{anything} end with cd
+// +,?,* used in the older version now we have to follow this syntax
+// ^\/ab+c$/
+// using req.query (convert string into object)
+// for hadling dynamic routes  /user/:userId using req.params (convert string into object)
+app.get("/user/:userId/:name",(req,res)=>{
+  // console.log(req.query);
+  // console.log(`your name is ${req.query.name} and your age is ${req.query.age}`);
+  console.log(req.params);
+  console.log(`your id is :${req.params.userId}, and your name is ${req.params.name}`);
   res.send({first_name:"aryan",last_name:"khanna"});
 })
-// for post only 
-app.post("/user",(req,res)=>{
-//  saving data to databse
-  res.send("data successfully saved to the database")
-})
-app.delete("/user",(req,res)=>{
-  res.send("delete the data");
-})
-// this is match all  the http method(get,post,patch,put) api calls to the /test
-// means give the same response for the get and other request that we send on url starting localhost:3000/test
-app.use("/test",(req,res)=>{ // this function is called request handler
-  res.send("hello from the server!")
-});
+
+
 
 app.listen(3000,()=>{
   console.log("your server is listing successfully on port 3000....");
