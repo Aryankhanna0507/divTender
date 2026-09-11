@@ -1,20 +1,30 @@
 const express=require("express");
 
 const app=express(); 
-// you put a question mark it means now b is optional here
-// if you + means any number b can be there a{bahut sare b}c
-// if you put * means anything can be in there in place of star the only condition is start with ab{anything} end with cd
-// +,?,* used in the older version now we have to follow this syntax
-// ^\/ab+c$/
-// using req.query (convert string into object)
-// for hadling dynamic routes  /user/:userId using req.params (convert string into object)
-app.get("/user/:userId/:name",(req,res)=>{
-  // console.log(req.query);
-  // console.log(`your name is ${req.query.name} and your age is ${req.query.age}`);
-  console.log(req.params);
-  console.log(`your id is :${req.params.userId}, and your name is ${req.params.name}`);
-  res.send({first_name:"aryan",last_name:"khanna"});
-})
+
+// remember one route can also have multiple route handler
+app.get("/user",(req,res,next)=>{
+  // route 1
+// if you will not add any res then it will become infinite req and after certain time time out will be hit and there is no response
+console.log("handling the route!1");
+res.send("First Response!");
+// if you would not write res in route 1 then it go to route 2 (<-(this statement is wrong) it does not happen we will be again in infinite loop)
+// for going the 2nd route you have to add one more parameter which is next then do the next()-> it will call the next route handler
+// next();
+// if it encounter the res.anyResponseFunction() then it does not directly just end the function after sending the response it runs the remaining code and then if it found  the next() and that next route handler also has a res.anyResponseFunction then it will give error because we already have send the response (we are trying to send the response to the same request it gives error because that tcp connection has been closed ) 
+},(req,res)=>{
+  // route 2
+  console.log("handling the request!2");
+
+  res.send("Second Response");
+  // next()->it will give you an error because here express expect one more route handler (it give can not get/user  )
+  // very imp-> instead of multiple route handler you can also send the array of function (route handler )
+  // the signature look like-;
+  // app.use("/route",rH1,rH2,rH3,rH4,rH5........); normal
+  // app.use("/route",[rH1,rH2,rH3,rH4,rH5........]); array 
+  // app.use("/route",[rH1,rH2],rH3,rH4,rH5........); array for first two remains as it is 
+  // not only for use it will work for all 
+});
 
 
 
