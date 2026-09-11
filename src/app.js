@@ -1,30 +1,59 @@
+const {userAuth,adminAuth}=require("./middlewares/auth.js");
 const express=require("express");
 
 const app=express(); 
 
-// remember one route can also have multiple route handler
-app.get("/user",(req,res,next)=>{
-  // route 1
-// if you will not add any res then it will become infinite req and after certain time time out will be hit and there is no response
-console.log("handling the route!1");
-res.send("First Response!");
-// if you would not write res in route 1 then it go to route 2 (<-(this statement is wrong) it does not happen we will be again in infinite loop)
-// for going the 2nd route you have to add one more parameter which is next then do the next()-> it will call the next route handler
-// next();
-// if it encounter the res.anyResponseFunction() then it does not directly just end the function after sending the response it runs the remaining code and then if it found  the next() and that next route handler also has a res.anyResponseFunction then it will give error because we already have send the response (we are trying to send the response to the same request it gives error because that tcp connection has been closed ) 
-},(req,res)=>{
-  // route 2
-  console.log("handling the request!2");
+// REQUEST GET /user=> it will go through the chain of middlewares(function that are before the function having res.send() ) and at the end it send the reqeustion 
+// the last function that having res.send()(means the function that sending response) is the main response or route handler and other are known as the middleware 
+// we can have multiple route hander for the same route (we already know it)
+// they are used of performing several operation before sending the respond like aunthentication , autheraization and many more 
+// but we can create these function in different routes like this-
+// app.use("/user",(req,res,next)=>{
+//   console.log("route from the the first");
+//   next();
+// })
+// app.use("/user",(req,res,next)=>{
+//   console.log("route from the second one");
+//   // next();
+//   res.send("finally got the response from route 2")
+// })
 
-  res.send("Second Response");
-  // next()->it will give you an error because here express expect one more route handler (it give can not get/user  )
-  // very imp-> instead of multiple route handler you can also send the array of function (route handler )
-  // the signature look like-;
-  // app.use("/route",rH1,rH2,rH3,rH4,rH5........); normal
-  // app.use("/route",[rH1,rH2,rH3,rH4,rH5........]); array 
-  // app.use("/route",[rH1,rH2],rH3,rH4,rH5........); array for first two remains as it is 
-  // not only for use it will work for all 
-});
+// example-:
+
+// handle the auth mideleware for all GET,POST... requests
+
+// app.use("/user",(req,res,next)=>{
+//   const token="xyz";
+//   const isAuthenticated=token=="xyz";
+//   if(isAuthenticated){
+//     console.log("user is authenticaed");
+//     next();
+//   }else{
+//     res.status(401).send("the user is not authenticated");
+//   }
+// })
+// commenting this because in best practices we create the middleware is seperate folder
+
+// we can also wriete like this 
+app.use("/admin",adminAuth);
+app.get("/admin/getData",(req,res)=>{
+  res.send("giving the data to admin");
+})
+
+
+// before giving the daata first check weather the uer is authenticated or not 
+app.get("/user/getAllData",userAuth,(req,res)=>{
+  res.send("got the complete data");
+})
+// before deleting the data first check weather the user is authenticated or not 
+app.delete("/user/deleteData",userAuth,(req,res)=>{
+  res.send("data has been deleted successfully");
+})
+app.post("/user/login",(req,res)=>{
+  res.send("user logged in");
+})
+
+
 
 
 
