@@ -1,30 +1,60 @@
 const {userAuth,adminAuth}=require("./middlewares/auth.js");
 const express=require("express");
 const {connectDB}=require("./config/database.js");
+
 const app=express(); 
-// first of get the user model
+
 const User=require("./models/user.js");
-
-
-//  if i create a route handler without giving the route then it will work for all the route  
-app.use(express.json());// this is middleware is aplicable for all the routes 
-// it will  run for all 
-
-// for stroing the data the request will be as a post reqeust
+app.use(express.json()); 
+// create post/signup api 
 app.post("/signup",async (req,res)=>{
-// instead of writing hard coded data, we want the data dynamically, user send us the data 
-// my api should receive the data and push data into the database
-// suppose client is sending the data in json format
-// we can not directly read the json data 
-// we need a middleware that read the json data
-// there is middleware given by express express.json()
-// console.log(req.body)-> without express.json() it will give undefind
-// console.log(req.body)
-// storing the data into the database
-const user=new User(req.body);
-await user.save();
-res.send("signed in successfully!");
- 
+try {
+  const user=new User(req.body);
+  
+  await user.save();
+  res.send("signed in successfully!");
+  
+} catch (error) {
+  res.status(400).send("can not sgined in")
+}
+
+
+})
+
+// create the get user api 
+// get the user using the email id 
+app.get("/user",async (req,res)=>{
+  // const users=await User.find(); this will give all the users 
+  // console.log(users);
+  try{
+      const {emailId}=req.body;
+      console.log(emailId);
+      const user=await User.findOne({emailId:emailId});// here we pass the filter , and this filter takes the java script object 
+    
+      console.log(user);
+      if(user==null){
+        res.status(404).send("user not found!");
+      }
+      
+      res.send("get the users:"+"\n"+user);
+    }catch(err){
+      res.status(400).send("can not get the user")
+    }
+})
+
+// find all the users from the api 
+// feed api get/feed - get all the users from the database
+app.get("/feed",async (req,res)=>{
+  try{
+    const users=await User.find();
+    if(users.length!=0){
+      res.send(users);
+    }else{
+      res.status(404).send("can not get the users");
+    }
+}catch(err){
+  res.status(400).send("something went wrong");
+}
 })
 
 connectDB().then(()=>{
