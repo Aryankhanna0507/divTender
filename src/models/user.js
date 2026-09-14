@@ -42,11 +42,18 @@ const userSchema=mongoose.Schema({
     lowercase:true,
     // gender is either male , female or others 
     // how to add custom validation function
-    validate(value){
-      if(!['male','female','other'].includes(value)){
-        throw new Error("Gender data is not valid!");
-      }
+    // validate(value){
+    //   if(!['male','female','other'].includes(value)){
+    //     throw new Error("Gender data is not valid!");
+    //   }
+    // }
+    // instead of this we can also do it like this
+
+    enum:{
+      values:["male","female","other"],
+      message:`{VALUE} is not supported`
     }
+
 // it is only be called when the object is created it is not call at the time of updation
   },
   photo:{
@@ -54,7 +61,25 @@ const userSchema=mongoose.Schema({
     default:"https://static.vecteezy.com/system/resources/thumbnails/036/594/092/small/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg"
   },
   skills:{
-    type:[String]
+    type:[String],
+    // applying a validator for skill does not contain more than 5 values and all the values must be uniqe
+    // just for learing purpose 
+    // but this type of validation is not a good way
+    // validate:[
+    //   {
+    //     validator:(value)=>{
+    //        return value.length<=5;
+    //     },
+    //     message:"can not have more than 5 skills"
+    //   },
+    //   {
+    //     validator:(value)=>{
+    //       const unique=new Set(value);
+    //       return value.length==unique.size;
+    //     },
+    //     message:"skills must be unique"
+    //   }
+    // ]
   },
 },
 
