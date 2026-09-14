@@ -56,11 +56,60 @@ app.get("/feed",async (req,res)=>{
   res.status(400).send("something went wrong");
 }
 })
+// create delete user api using findbyidanddelete app.delete
+
+app.delete("/delete",async (req,res)=>{
+  try {
+    const userId=req.body.userId;
+    // console.log(userId);
+    await User.findByIdAndDelete(userId);
+    res.send("user deleted");
+  } catch (error) {
+    res.status(401).send("somthing went wrong");
+  }
+})
+//  creat an api for updating the data app.patch (findoneandupdate vs findbyidandupdate)
+app.patch("/update",async (req,res)=>{
+  try{
+    const userId=req.body.userId;
+    const newData=req.body;
+    // await User.findByIdAndUpdate(userId,newData);
+    const dataUpdated= await User.findByIdAndUpdate(userId,newData,{returnDocument:'after'});
+    console.log(dataUpdated);
+    res.send("user data has been updated");
+  }catch(err){
+    res.status(401).send("something went wrong");
+  }
+})
+
+// try to use the options(the third paremeter) from the documantations
+// diff patch and put 
+
+//  update the user with the email id 
+app.patch("/update-email",async (req,res)=>{
+  try{
+    const {emailId:userEmailId,...dataToUpdate}=req.body;
+    console.log(userEmailId);
+    const user=await User.findOneAndUpdate({emailId:userEmailId},dataToUpdate,{new:true});
+    if(user==null){
+      res.status(401).send("user not found");
+    }
+    console.log(user);
+    // res.send("data of the user with emailId ("+userEmailId +") has been updated to:-\n"+user); // you send response like then it will  go as string 
+    // if you want to send the response as json object then use res.json({})
+    res.json({
+      message:"data of the user with emailId ("+userEmailId +") has been updated to:-",
+      user:user,
+    })
+  }catch(err){
+    res.status(401).send("something went wrong");
+  }
+})
 
 connectDB().then(()=>{
   console.log("your database has been connected successfully....");
   app.listen(3000,()=>{
-    console.log("your serer is listing successfully on port:30000....");
+    console.log("your serer is listing successfully on port:3000....");
   })
 }).catch((err)=>{
   console.log("failed to connect the database!!!!");
