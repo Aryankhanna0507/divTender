@@ -10,12 +10,13 @@ app.use(express.json());
 app.post("/signup",async (req,res)=>{
 try {
   const user=new User(req.body);
-  
+  console.log(user);
   await user.save();
   res.send("signed in successfully!");
   
 } catch (error) {
-  res.status(400).send("can not sgined in")
+  res.status(400).send(error.message);
+
 }
 
 
@@ -38,7 +39,7 @@ app.get("/user",async (req,res)=>{
       
       res.send("get the users:"+"\n"+user);
     }catch(err){
-      res.status(400).send("can not get the user")
+      res.status(400).send("can not get the user"+err)
     }
 })
 
@@ -53,7 +54,7 @@ app.get("/feed",async (req,res)=>{
       res.status(404).send("can not get the users");
     }
 }catch(err){
-  res.status(400).send("something went wrong");
+  res.status(400).send("something went wrong"+err);
 }
 })
 // create delete user api using findbyidanddelete app.delete
@@ -65,20 +66,21 @@ app.delete("/delete",async (req,res)=>{
     await User.findByIdAndDelete(userId);
     res.send("user deleted");
   } catch (error) {
-    res.status(401).send("somthing went wrong");
+    res.status(401).send("somthing went wrong"+error);
   }
 })
 //  creat an api for updating the data app.patch (findoneandupdate vs findbyidandupdate)
 app.patch("/update",async (req,res)=>{
   try{
-    const userId=req.body.userId;
-    const newData=req.body;
+    // const userId=req.body.userId;
+    const {userId,...newData}=req.body;
+    // console.log("hello")
     // await User.findByIdAndUpdate(userId,newData);
-    const dataUpdated= await User.findByIdAndUpdate(userId,newData,{returnDocument:'after'});
+    const dataUpdated= await User.findByIdAndUpdate(userId,newData,{returnDocument:'after',runValidators:true});
     console.log(dataUpdated);
     res.send("user data has been updated");
   }catch(err){
-    res.status(401).send("something went wrong");
+    res.status(401).send("something went wrong"+err);
   }
 })
 
@@ -90,7 +92,7 @@ app.patch("/update-email",async (req,res)=>{
   try{
     const {emailId:userEmailId,...dataToUpdate}=req.body;
     console.log(userEmailId);
-    const user=await User.findOneAndUpdate({emailId:userEmailId},dataToUpdate,{new:true});
+    const user=await User.findOneAndUpdate({emailId:userEmailId},dataToUpdate,{new:true,runValidators:true});
     if(user==null){
       res.status(401).send("user not found");
     }
@@ -102,7 +104,7 @@ app.patch("/update-email",async (req,res)=>{
       user:user,
     })
   }catch(err){
-    res.status(401).send("something went wrong");
+    res.status(401).send("something went wrong"+err);
   }
 })
 
@@ -112,5 +114,5 @@ connectDB().then(()=>{
     console.log("your serer is listing successfully on port:3000....");
   })
 }).catch((err)=>{
-  console.log("failed to connect the database!!!!");
+  console.log("failed to connect the database!!!!"+err.message);
 })
