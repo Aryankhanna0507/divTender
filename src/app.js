@@ -1,7 +1,9 @@
 const {userAuth,adminAuth}=require("./middlewares/auth.js");
 const express=require("express");
 const {connectDB}=require("./config/database.js");
-
+const {validataSignupData}=require("./utils/validation.js")
+const bcrypt=require("bcrypt");
+const validator=require("validator");
 const app=express(); 
 
 const User=require("./models/user.js");
@@ -9,8 +11,27 @@ app.use(express.json());
 
 // create post/signup api 
 app.post("/signup",async (req,res)=>{
-try {
-  const user=new User(req.body);
+  try {
+  // sign up api should be very secure
+  
+ // validation of the data    
+    validataSignupData(req);
+  // encrypt the password  
+  const {firstName,lastName,emailId,password}=req.body;
+  const passwordHash=await bcrypt.hash(password,10);
+  console.log(passwordHash);
+  
+  // dont write the logic for validation and other things here just write the logic for only api  create a differtent folder named utiles and put these exrtra logic in that folder
+
+  // creating the new instance of the user model
+  // never directly store everythign in req.body it may contain "xyz":"kuch bhi"
+  // only store the tings that have meaning for you
+  const user=new User({
+    firstName,
+    lastName,
+    emailId,
+    password:passwordHash
+  });
   console.log(user);
   await user.save();
   res.send("signed in successfully!");
@@ -19,6 +40,32 @@ try {
   res.status(400).send(error.message);
 
 }
+})
+
+// creating the login api
+
+app.post("/login",async (req,res)=>{
+  try{
+    // first of take the data given by the uer
+
+    const {emailId,password}=req.body;
+    // apply senitization on the email id
+    const isValidEmail=validator.isEmail(emailId);
+    if(!isValidEmail){
+      throw new Error("Invalid credentials");
+    }
+    const user=await User.findOne({emailId:emailId});
+    if(!user){
+      throw new Error("Invalid credentials")
+    }
+    const isValidPassword=bcrypt.compare(password,user.password);
+    if(!isValidPassword){
+      throw new error("Invalid credentials")
+    }
+    res.send("Login successfully!");
+  }catch(err){
+    res.status(400).send("login Failed:"+err.message);
+  }
 })
 
 // get the user using the email id 
