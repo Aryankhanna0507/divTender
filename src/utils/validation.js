@@ -1,7 +1,7 @@
 // put all the validation code here 
 const { model } = require("mongoose");
 const validator=require("validator");
-const validataSignupData=(req)=>{
+const validateSignupData=(req)=>{
   const {firstName,lastName,emailId,password}=req.body;
   if(!firstName || !lastName){
     throw new Error("Name is not valid!!");
@@ -12,5 +12,5 @@ const validataSignupData=(req)=>{
   }
 }
 module.exports={
-  validataSignupData,
+  validateSignupData,
 }
