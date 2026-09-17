@@ -1,6 +1,7 @@
 const mongoose=require("mongoose");
 const validator=require("validator");
-
+const jwt=require("jsonwebtoken")
+const bcrypt=require("bcrypt")
 const userSchema=mongoose.Schema({
   firstName:{
     type:String,
@@ -71,5 +72,20 @@ const userSchema=mongoose.Schema({
   timestamps:true
 }
 );
+
+// there is called something known as mongoose schema methods we can attach mathode to every user
+// whenever you are creating schema try not to use arrow methods 
+// if write arrow functoin instead of normal function then 'this' will not work 
+userSchema.methods.getJWT= async function(){
+  const user=this;// this will refer to the current document of that collection (user)
+  const token=await jwt.sign({_id:this._id},"DEV@tinder$123$",{expiresIn:"1d"});
+  console.log("return me ",token);
+  return token;
+}
+
+userSchema.methods.validatePassword=async function(passwordInputByUser){
+  return await bcrypt.compare(passwordInputByUser,this.password);
+}
+
 module.exports=mongoose.model("User",userSchema);
 
