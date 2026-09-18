@@ -34,7 +34,7 @@ authRouter.post("/signup",async (req,res)=>{
   res.status(400).send(error.message);
 
 }
-})
+});
 
 // creating a login api  
 
@@ -58,10 +58,23 @@ authRouter.post("/login",async (req,res)=>{
     const token=await user.getJWT();
 
     console.log(token);
-    res.cookie('token',token,{expires:new Date(Date.now()+7*3600000),httpOnly:true});
-    res.send("Login successfully!");
+    res.cookie('token',token,{expires:new Date(Date.now()+7*3600000),httpOnly:true}).json({
+      message:"Login successfully!!!",
+      user
+    }); // ek hi bar cookie bhi laga do aur response bhi bhej do 
+    // res.send("Login successfully!");
   }catch(err){
     res.status(400).send("login Failed:"+err.message);
+  }
+})
+
+authRouter.post("/logout",(req,res)=>{
+  try{
+    res.cookie('token',null,{expires:new Date(Date.now())});
+    // console.log("cookie become null")
+    res.send("user looged out successfully");
+  }catch(err){
+    res.status(400).send("fail to logout")
   }
 })
 
